@@ -167,7 +167,19 @@ jobs:
         find ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/ -name "common.mk" 2>/dev/null | head -30
         echo "=== Find all 'fox' or 'recovery' dirs in root ==="
         find ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/ -maxdepth 2 -type d -name "fox" -o -type d -name "recovery" 2>/dev/null
-     
+
+    - name: Symlink vendor/recovery
+      run: |
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1
+        echo "=== Root contents ==="
+        ls -la | grep -E "recovery|vendor"
+        echo "=== Creating symlink ==="
+        mkdir -p vendor
+        ln -sfn ../recovery vendor/recovery
+        echo "=== Verify ==="
+        ls -la vendor/
+        ls -la vendor/recovery/config/common.mk || echo "STILL NOT FOUND"
+        
     - name: Building OrangeFox
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
