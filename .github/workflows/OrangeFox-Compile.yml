@@ -162,9 +162,12 @@ jobs:
     - name: Patch orangefox.mk (AB_OTA_UPDATER fix)
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/bootable/recovery
-        sed -i 's/^\(AB_OTA_UPDATER\)/## \1/' orangefox.mk
-        grep -n "AB_OTA_UPDATER" orangefox.mk || echo "not found"
-         
+        echo "=== Before ==="
+        sed -n '170p' orangefox.mk
+        sed -i '170s/^/## /' orangefox.mk
+        echo "=== After ==="
+        sed -n '170p' orangefox.mk
+        
     - name: Building OrangeFox
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}
