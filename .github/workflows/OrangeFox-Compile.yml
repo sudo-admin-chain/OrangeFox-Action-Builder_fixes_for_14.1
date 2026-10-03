@@ -42,15 +42,6 @@ on:
         - boot
         - recovery
         - vendorboot
-      MAGISK_VERSION:
-        description: 'Specify your Magisk Version'
-        required: true
-        default: 'Magisk'
-        type: choice
-        options:
-        - Magisk
-        - MagiskAlpha
-        - MagiskDelta
       ADD_WLAN_SUPPORT:
         description: 'Add WLAN support (EXPERIMENTAL!!)'
         type: boolean
@@ -182,9 +173,9 @@ jobs:
         export ALLOW_MISSING_DEPENDENCIES=true
         set -e
         if [[ ${{ inputs.MANIFEST_BRANCH }} == '14.1' ]]; then
-        lunch twrp_${{ inputs.DEVICE_NAME }}-ap2a-eng && make clean && mka adbd ${{ inputs.BUILD_TARGET }}image
+        lunch fox_${{ inputs.DEVICE_NAME }}-ap2a-eng && make clean && mka adbd ${{ inputs.BUILD_TARGET }}image
         else
-        lunch twrp_${{ inputs.DEVICE_NAME }}-eng && make clean && mka adbd ${{ inputs.BUILD_TARGET }}image
+        lunch fox_${{ inputs.DEVICE_NAME }}-eng && make clean && mka adbd ${{ inputs.BUILD_TARGET }}image
         fi
 
     - name: Set Release Properties
