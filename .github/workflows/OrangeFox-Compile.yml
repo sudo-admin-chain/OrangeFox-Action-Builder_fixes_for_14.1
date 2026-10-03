@@ -158,6 +158,15 @@ jobs:
         git clone ${{ inputs.DEVICE_TREE }} -b ${{ inputs.DEVICE_TREE_BRANCH }} ./${{ inputs.DEVICE_PATH }}
         cd ${{ inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+    - name: Debug vendor tree location
+      run: |
+        echo "=== Looking in fox_14.1/vendor/ ==="
+        ls -la ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/vendor/ 2>/dev/null || echo "not found"
+        echo "=== Find all 'common.mk' in vendor dirs ==="
+        find ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/ -name "common.mk" 2>/dev/null | head -30
+        echo "=== Find all 'fox' or 'recovery' dirs in root ==="
+        find ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/ -maxdepth 2 -type d -name "fox" -o -type d -name "recovery" 2>/dev/null
      
     - name: Building OrangeFox
       run: |
