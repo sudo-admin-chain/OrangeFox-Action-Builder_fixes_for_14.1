@@ -159,12 +159,17 @@ jobs:
         cd ${{ inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-    - name: Create vendor/recovery symlink
+    - name: Symlink vendor/recovery
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1
+        echo "=== Root contents ==="
+        ls -la | grep -E "recovery|vendor"
+        echo "=== Creating symlink ==="
         mkdir -p vendor
-        ln -sf ../recovery vendor/recovery
+        ln -sfn ../recovery vendor/recovery
+        echo "=== Verify ==="
         ls -la vendor/
+        ls -la vendor/recovery/config/common.mk || echo "STILL NOT FOUND"
      
     - name: Building OrangeFox
       run: |
