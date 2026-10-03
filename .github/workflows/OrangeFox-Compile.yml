@@ -158,6 +158,13 @@ jobs:
         git clone ${{ inputs.DEVICE_TREE }} -b ${{ inputs.DEVICE_TREE_BRANCH }} ./${{ inputs.DEVICE_PATH }}
         cd ${{ inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+    - name: Create vendor/recovery symlink
+      run: |
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1
+        mkdir -p vendor
+        ln -sf ../recovery vendor/recovery
+        ls -la vendor/
      
     - name: Building OrangeFox
       run: |
