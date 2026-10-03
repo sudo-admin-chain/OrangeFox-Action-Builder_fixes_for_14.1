@@ -158,6 +158,12 @@ jobs:
         git clone ${{ inputs.DEVICE_TREE }} -b ${{ inputs.DEVICE_TREE_BRANCH }} ./${{ inputs.DEVICE_PATH }}
         cd ${{ inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+    - name: Patch orangefox.mk (AB_OTA_UPDATER fix)
+      run: |
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/bootable/recovery
+        sed -i 's/^\(AB_OTA_UPDATER\)/## \1/' orangefox.mk
+        grep -n "AB_OTA_UPDATER" orangefox.mk || echo "not found"
          
     - name: Building OrangeFox
       run: |
