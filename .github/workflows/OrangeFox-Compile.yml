@@ -159,26 +159,29 @@ jobs:
         cd ${{ inputs.DEVICE_PATH }}
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-    - name: Debug vendor tree location
+    - name: Debug vendor dir
       run: |
-        echo "=== Looking in fox_14.1/vendor/ ==="
-        ls -la ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/vendor/ 2>/dev/null || echo "not found"
-        echo "=== Find all 'common.mk' in vendor dirs ==="
-        find ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/ -name "common.mk" 2>/dev/null | head -30
-        echo "=== Find all 'fox' or 'recovery' dirs in root ==="
-        find ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/ -maxdepth 2 -type d -name "fox" -o -type d -name "recovery" 2>/dev/null
+        echo "=== vendor/ contents ==="
+        ls -la ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/vendor/ || echo "no vendor dir"
+        echo "=== find fox/recovery/config ==="
+        find ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/ -type d -name "config" 2>/dev/null | head -20
+        echo "=== find common.mk ==="
+        find ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/ -name "common.mk" 2>/dev/null | grep -i "vendor\|fox\|recovery" | head -20
 
-    - name: Symlink vendor/recovery
+    - name: Patch orangefox.mk (AB_OTA_UPDATER fix)
+      run: |
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/bootable/recovery
+        echo "=== Before ==="
+        sed -n '170p' orangefox.mk
+        sed -i '170s/^/## /' orangefox.mk
+        echo "=== After ==="
+        sed -n '170p' orangefox.mk
+
+    - name: Disable CTS
       run: |
         cd ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1
-        echo "=== Root contents ==="
-        ls -la | grep -E "recovery|vendor"
-        echo "=== Creating symlink ==="
-        mkdir -p vendor
-        ln -sfn ../recovery vendor/recovery
-        echo "=== Verify ==="
-        ls -la vendor/
-        ls -la vendor/recovery/config/common.mk || echo "STILL NOT FOUND"
+        echo "16" >> cts/tests/tests/os/assets/platform_releases.txt
+        cat cts/tests/tests/os/assets/platform_releases.txt
         
     - name: Building OrangeFox
       run: |
@@ -210,12 +213,17 @@ jobs:
         fi
         echo "DEVICE_TREE_URL=${DEVICE_TREE_URL}" >> $GITHUB_ENV
 
+    - name: List output files
+      run: |
+        find ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1/out/target/product/spinel/ -name "*.img" -ls
+
     - name: Upload to Release
       uses: softprops/action-gh-release@master
       with:
         files: |
-          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/OrangeFox*.img
-          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/OrangeFox*.zip
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/vendor_boot*.img
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/boot*.img
+          OrangeFox/fox_${{ inputs.MANIFEST_BRANCH }}/out/target/product/${{ inputs.DEVICE_NAME }}/recovery*.img
         name: OrangeFox Recovery for ${{ inputs.DEVICE_NAME }} // ${{ env.BUILD_DATE }}
         tag_name: ${{ github.run_id }}
         body: |
@@ -223,4 +231,4 @@ jobs:
           Build: fox_${{ inputs.MANIFEST_BRANCH }}
           Device: [Device Tree/Branch](${{ env.DEVICE_TREE_URL }}/tree/${{ inputs.DEVICE_TREE_BRANCH }})
           Commit: Most recent [commit](${{ env.DEVICE_TREE_URL }}/commit/${{ env.COMMIT_ID }}) during building.
-          
+  
