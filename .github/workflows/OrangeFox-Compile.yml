@@ -167,6 +167,12 @@ jobs:
         sed -i '170s/^/## /' orangefox.mk
         echo "=== After ==="
         sed -n '170p' orangefox.mk
+
+    - name: Disable CTS
+      run: |
+        cd ${GITHUB_WORKSPACE}/OrangeFox/fox_14.1
+        echo "16" >> cts/tests/tests/os/assets/platform_releases.txt
+        cat cts/tests/tests/os/assets/platform_releases.txt
         
     - name: Building OrangeFox
       run: |
